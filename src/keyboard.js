@@ -1,15 +1,45 @@
 import keys from './keys';
+import * as keyFunc from './keyFunc';
 
 
 class Keyboadrd {
-    constructor() {
+    constructor(input, keyboard, keyboardDriver) {
+        this.input = input;
+        this.keyboard = keyboard;
+        this.keyboardDriver = keyboardDriver;
         this.keys = keys;
         this.lang = 'ru';
         this.state = "normal";
-        this.keys.find((e) => e.id === 'lang').func = this.setLanguage.bind(this);
+        this.keys.forEach(e => {
+            switch (e.id) {
+                case 'lang':
+                    e.func = keyFunc.changeLanguage.bind(this);
+                    break;
+                case '16_l':
+                    e.func = keyFunc.shiftPressed.bind(this);
+                    break;
+                case '16_r':
+                    e.func = keyFunc.shiftPressed.bind(this);
+                    break;
+                case '18_l':
+                    e.func = keyFunc.altPressed.bind(this);
+                    break;
+                case '18_r':
+                    e.func = keyFunc.altPressed.bind(this);
+                    break;
+                case 20:
+                    e.func = keyFunc.capsPressed.bind(this, e);
+                    break;
+                default:
+                    break;
+            }
+        })
+        this.shift = false;
+        this.alt = false;
+        this.caps = false;
     }
 
-    initialize(input, keyboard) {
+    initialize() {
         keys.forEach((key) => {
             let div = document.createElement('div');
         
@@ -19,18 +49,22 @@ class Keyboadrd {
         
             key.ref = div;
         
-            keyboard.appendChild(div);
+            this.keyboard.appendChild(div);
         
             if (key.func) {
                 if(key.id === 'lang'){
                     div.innerHTML = `<p>${key.name[this.lang]}</p>`;
-                    div.addEventListener('mousedown', (event) => {
-                        event.preventDefault();
-                        key.func();
-                    })
                 } else {
-                    div.innerHTML = `<p>${key.name}</p>`;                    
+                    div.innerHTML = `<p>${key.name}</p>`;
                 }
+                div.addEventListener('mousedown', (event) => {
+                    event.preventDefault();
+                    key.func(true, true);
+                })
+                div.addEventListener('mouseup', (event) => {
+                    event.preventDefault();
+                    key.func(false, true);
+                })
 
             } else {
                 if(key.name[this.lang].double){
@@ -38,17 +72,19 @@ class Keyboadrd {
                     div.innerHTML = `<p class = "act">${key.name[this.lang].normal}</p><p class = "passive">${key.name[this.lang].shifted}</p>`;
                     div.addEventListener('mousedown', (event) => {
                         event.preventDefault();
-                        input.value += div.querySelector('.act').textContent;
+                        this.inputChar(key);
                     })
                 } else {
                     div.innerHTML = `<p>${key.name[this.lang][this.state]}</p>`;
                     div.addEventListener('mousedown', (event) => {
                         event.preventDefault();
-                        input.value += div.children[0].textContent;
+                        this.inputChar(key);
                     })
                 }
             }
         })
+
+        this.keyboardDriver.initialize(keys, this.inputChar.bind(this))
     }
 
     setLanguage() {
@@ -94,32 +130,23 @@ class Keyboadrd {
         })
     }
 
-    getKey(id) {
-        if (event.shiftKey  &&  event.altKey) {
-            this.setLanguage(); //fix
-        } else {
-            let func = null;
-            let char = null;
-            const pressedKeys = keys.filter(k => k.id === id ||
-                `${id}_l` === k.id || `${id}_r` === k.id);
+    getInputText() {
+        const start = this.input.selectionStart;
+        const end = this.input.selectionEnd;
+        const begin = this.input.value.substring(0, start);
+        const finish = this.input.value.substring(end, 999999999999);
+        console.log(start, end, begin, finish)
+        return { start, begin, finish }
+    }
 
-            pressedKeys.forEach(k => {
-                k.ref.classList.toggle('active');
-            });
+    setFocus(start) {
+        this.input.setSelectionRange(start, start);
+    }
 
-            if (pressedKeys.length) {
-                if (!pressedKeys[0].func) {
-                    char = pressedKeys[0].name[this.lang][this.state];
-                } else {
-                    if(id === 16 || id === 20) {  //fix
-                        this.setState()
-                    }
-                    func = id; //fix
-                    //FUNC
-                }
-            } 
-            return { func, char };            
-        }
+    inputChar(key) {
+        const {start, begin, finish } = this.getInputText();
+        this.input.value = begin + key.name[this.lang][this.state] + finish;
+        this.setFocus(start + 1)
     }
 
 }

@@ -778,7 +778,7 @@ const keys = [
             },
             ru: {
                 normal: 'ь',
-                shifted: 'ь',
+                shifted: 'Ь',
                 double: false
             }
         }
@@ -849,13 +849,13 @@ const keys = [
     {
         id: '17_l',
         size: 1,
-        func: true,
+        func: () => {},
         name: 'Ctrl'
     },
     {
         id: 91,
         size: 1,
-        func: true,
+        func: () => {},
         name: 'Win'
     },
     {
@@ -879,7 +879,7 @@ const keys = [
     {
         id: '17_r',
         size: 1,
-        func: true,
+        func: () => {},
         name: 'Ctrl'
     },
     {
