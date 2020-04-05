@@ -17,12 +17,14 @@ class keyboardDriver {
         })
 
         document.addEventListener('keyup', (event) => {
-            const { func, char } = this.getKey(event.keyCode, false);
-            if(func) {
-                event.preventDefault();
-                func(false);
-            } else if (char) {
-                event.preventDefault();
+            const key = this.getKey(event.keyCode, false);
+            if (key) {
+                if(key.func) {
+                    event.preventDefault();
+                    key.func(false);
+                } else if (key.char) {
+                    event.preventDefault();
+                }
             }
             clearPressed(false);
         })

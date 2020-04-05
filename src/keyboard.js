@@ -20,12 +20,14 @@ class Keyboadrd {
 
         this.prevPressedKeys = null;
         this.pressedKeys = null;
+
+        this.charWidth = 10;
     }
 
     initialize() {
         keys.forEach((key) => {
             let div = document.createElement('div');
-        
+            
             div.className = 'keyboard-button';
             div.id = key.id;
             div.style.flexBasis = `calc(100% / 15.5 * ${key.size} - 0.4%)`;
@@ -210,6 +212,15 @@ class Keyboadrd {
                     break;
                 case 9:
                     e.func = keyFunc.tabPressed.bind(this);
+                    break;
+                case 37:
+                    e.func = keyFunc.leftPressed.bind(this);
+                    break;                    
+                case 38:
+                    e.func = keyFunc.upPressed.bind(this);
+                    break;              
+                case 39:
+                    e.func = keyFunc.rightPressed.bind(this);
                     break;
                 default:
                     break;

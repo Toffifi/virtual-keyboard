@@ -122,6 +122,61 @@ export function enterPressed(pressed) {
 
 export function tabPressed(pressed) {
     if(pressed){
-        this.inputChar(null, '\t')
+        this.inputChar(null, '    ')
+        this.setFocus(this.input.selectionStart + 3)
+    }
+}
+
+export function leftPressed(pressed) {
+    if(pressed){
+        this.setFocus(this.input.selectionStart > 0 ? this.input.selectionStart - 1 : 0);
+    }
+}
+
+export function rightPressed(pressed) {
+    if(pressed){
+        const start = this.input.selectionStart;
+        const length = this.input.value.length;
+        this.setFocus(start < length - 1 ? start + 1 : length);
+    }
+}
+
+export function upPressed(pressed) {
+    if(pressed){
+        const charLine = Math.ceil((this.input.offsetWidth - 20) / this.charWidth);
+        let start = this.input.selectionStart;
+        const rows = this.input.value.split('\n').join('\n\t').split('\n');
+        const arr = [];
+        rows.forEach((e) => {
+            if(e.length > charLine) {
+                let row = e;
+                while (row.length > 0) {
+                    arr.push(row.substring(0, charLine));
+                    row = row.substring(charLine);
+                }
+            } else {
+                arr.push(e);
+            }
+        })     
+        let acc = 0;
+        let newPos = start;
+        for (let i in arr) {
+            if(acc + arr[i].length >= start) {
+                const begin = start - acc;
+                if(i > 0) {
+                    acc -= arr[i - 1].length;
+                    newPos = acc + (begin >= arr[i - 1].length ? arr[i - 1].length : begin);
+                    if (i == 1 && arr[i][0] === '\t' && newPos < arr[0].length - 1) {
+                        newPos = newPos > 0 ? newPos - 1 : 0;
+                    }
+                } else if (i == 0 && arr[i].length === charLine && charLine === start) {
+                    newPos = 0;
+                }
+                break;
+            } else {                
+                acc += arr[i].length;
+            }
+        }
+        this.setFocus(newPos);
     }
 }

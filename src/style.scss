@@ -16,6 +16,11 @@ body {
             padding: 10px;
             width: 100%;
             height: 35vh;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar{
+                width: 0;
+            }
         }        
     }
 }
