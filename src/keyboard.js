@@ -30,6 +30,12 @@ class Keyboadrd {
                 case 20:
                     e.func = keyFunc.capsPressed.bind(this, e);
                     break;
+                case 8:
+                    e.func = keyFunc.backspacePressed.bind(this);
+                    break;                    
+                case 46:
+                    e.func = keyFunc.delPressed.bind(this);
+                    break;
                 default:
                     break;
             }
@@ -134,9 +140,9 @@ class Keyboadrd {
         const start = this.input.selectionStart;
         const end = this.input.selectionEnd;
         const begin = this.input.value.substring(0, start);
-        const finish = this.input.value.substring(end, 999999999999);
+        const finish = this.input.value.substring(end);
         console.log(start, end, begin, finish)
-        return { start, begin, finish }
+        return { start, end, begin, finish }
     }
 
     setFocus(start) {
@@ -144,9 +150,9 @@ class Keyboadrd {
     }
 
     inputChar(key) {
-        const {start, begin, finish } = this.getInputText();
-        this.input.value = begin + key.name[this.lang][this.state] + finish;
-        this.setFocus(start + 1)
+        const result = this.getInputText();
+        this.input.value = result.begin + key.name[this.lang][this.state] + result.finish;
+        this.setFocus(result.start + 1)
     }
 
 }

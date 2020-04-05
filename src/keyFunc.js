@@ -37,3 +37,28 @@ export function changeLanguage(pressed) {
     this.setLanguage();
   }
 }
+
+export function backspacePressed(pressed) {
+    if (pressed) {
+        const {start, end, begin, finish } = this.getInputText();
+        if(start === end){
+            this.input.value = begin.substring(0, begin.length - 1) + finish;
+            this.setFocus(start - 1)
+        } else {
+            this.input.value = begin + finish;
+            this.setFocus(start)
+        }
+      }
+}
+
+export function delPressed(pressed) {
+    if (pressed) {
+        const {start, end, begin, finish } = this.getInputText();
+        if(start === end){
+            this.input.value = begin + finish.substring(1);
+        } else {
+            this.input.value = begin + finish;
+        }        
+        this.setFocus(start)
+      }
+}
