@@ -1,16 +1,18 @@
 class keyboardDriver {
 
-    initialize(keys, inputChar) {
+    initialize(keys, inputChar, clearPressed) {
         this.keys = keys;
         document.addEventListener('keydown', (event) => {
             const key = this.getKey(event.keyCode, true);
-            if (key && !key.func) {
-                event.preventDefault();
-                inputChar(key);
-            }
-            if (key && key.func) {
-                event.preventDefault();
-                key.func(true);
+            if (key) {
+                if (!event.ctrlKey) {
+                    event.preventDefault();
+                }
+                if (key.func) {
+                    key.func(true);
+                } else  if (!event.ctrlKey) {
+                    inputChar(key);
+                }
             }
         })
 
@@ -22,7 +24,7 @@ class keyboardDriver {
             } else if (char) {
                 event.preventDefault();
             }
-            
+            clearPressed(false);
         })
     }
 

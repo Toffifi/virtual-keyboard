@@ -12,7 +12,7 @@ body {
 
         textarea {
             resize: none;
-            font-size: 20px;
+            font-size: 18px;
             padding: 10px;
             width: 100%;
             height: 35vh;
@@ -41,7 +41,7 @@ body {
         &:hover {
             cursor: pointer;
             background-color: white;
-            color: black;
+            color: black !important;
         }
         &:active {
             color: white;
@@ -58,12 +58,27 @@ body {
         p {
             margin: 0;
         }
-        .passive {
-            font-size: 15px;
-            position: absolute;
-            top: 3px;
-            left: 5px;
+        .act {
             color: #7a7a7a;
+        }
+        &:hover .act {
+            color: white;
+        }
+        .passive {
+            font-size: 20px;
+            position: absolute;
+            top: 0px;
+            left: 3px;
+            color: #7a7a7a;
+        }
+        &:hover .passive {
+            color: white;
+        }
+        .selected {
+            color: white;
+        }
+        &:hover .selected {
+            color: black !important;
         }
     }
 }

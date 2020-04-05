@@ -8,41 +8,18 @@ class Keyboadrd {
         this.keyboard = keyboard;
         this.keyboardDriver = keyboardDriver;
         this.keys = keys;
-        this.lang = 'ru';
+        this.bindFunc();
+        this.lang = localStorage.getItem('lang') ? localStorage.getItem('lang') : 'en'
         this.state = "normal";
-        this.keys.forEach(e => {
-            switch (e.id) {
-                case 'lang':
-                    e.func = keyFunc.changeLanguage.bind(this);
-                    break;
-                case '16_l':
-                    e.func = keyFunc.shiftPressed.bind(this);
-                    break;
-                case '16_r':
-                    e.func = keyFunc.shiftPressed.bind(this);
-                    break;
-                case '18_l':
-                    e.func = keyFunc.altPressed.bind(this);
-                    break;
-                case '18_r':
-                    e.func = keyFunc.altPressed.bind(this);
-                    break;
-                case 20:
-                    e.func = keyFunc.capsPressed.bind(this, e);
-                    break;
-                case 8:
-                    e.func = keyFunc.backspacePressed.bind(this);
-                    break;                    
-                case 46:
-                    e.func = keyFunc.delPressed.bind(this);
-                    break;
-                default:
-                    break;
-            }
-        })
+
         this.shift = false;
         this.alt = false;
+        this.ctrl = false;
+
         this.caps = false;
+
+        this.prevPressedKeys = null;
+        this.pressedKeys = null;
     }
 
     initialize() {
@@ -65,39 +42,39 @@ class Keyboadrd {
                 }
                 div.addEventListener('mousedown', (event) => {
                     event.preventDefault();
-                    key.func(true, true);
+                    this.prevPressedKeys = this.pressedKeys;
+                    this.pressedKeys = key.func(true, true);
                 })
                 div.addEventListener('mouseup', (event) => {
                     event.preventDefault();
-                    key.func(false, true);
+                    key.func(false, this.prevPressedKeys ? false : true);
+                    this.clearPressed(true);
                 })
-
             } else {
+                div.addEventListener('mousedown', (event) => {
+                    event.preventDefault();
+                    this.inputChar(key);
+                    this.clearPressed(false);
+                })
                 if(key.name[this.lang].double){
                     div.className = 'keyboard-button_double';
-                    div.innerHTML = `<p class = "act">${key.name[this.lang].normal}</p><p class = "passive">${key.name[this.lang].shifted}</p>`;
-                    div.addEventListener('mousedown', (event) => {
-                        event.preventDefault();
-                        this.inputChar(key);
-                    })
+                    this.doubleKeys(key);
                 } else {
                     div.innerHTML = `<p>${key.name[this.lang][this.state]}</p>`;
-                    div.addEventListener('mousedown', (event) => {
-                        event.preventDefault();
-                        this.inputChar(key);
-                    })
                 }
             }
         })
 
-        this.keyboardDriver.initialize(keys, this.inputChar.bind(this))
+        this.keyboardDriver.initialize(keys, this.inputChar.bind(this), this.clearPressed.bind(this))
     }
 
     setLanguage() {
         if (this.lang === 'ru'){
+            localStorage.setItem('lang', 'en');
             this.lang = 'en'
             this.updateKeyboard()
         } else if (this.lang === 'en'){
+            localStorage.setItem('lang', 'ru');
             this.lang = 'ru'
             this.updateKeyboard()
         } else {
@@ -123,7 +100,7 @@ class Keyboadrd {
             if(!key.func){
                 if(key.name[this.lang].double){
                     div.className = 'keyboard-button_double';
-                    div.innerHTML = `<p class = "act">${key.name[this.lang].normal}</p><p class = "passive">${key.name[this.lang].shifted}</p>`;
+                    this.doubleKeys(key);
                 } else {
                     div.className = 'keyboard-button';
                     div.innerHTML = `<p>${key.name[this.lang][this.state]}</p>`;
@@ -136,12 +113,34 @@ class Keyboadrd {
         })
     }
 
+    doubleKeys(key) {
+        key.ref.innerHTML = '';
+
+        const one = document.createElement('p');
+        one.innerHTML = key.name[this.lang].normal;
+        one.className = 'act';
+
+        const two = document.createElement('p');
+        two.innerHTML = key.name[this.lang].shifted;
+        two.className = 'passive';
+
+        key.ref.appendChild(one);
+        key.ref.appendChild(two);
+
+        if(this.state === 'shifted') {
+            two.classList.add("selected");
+            one.classList.remove("selected");
+        } else {
+            one.classList.add("selected");
+            two.classList.remove("selected");
+        }
+    }
+
     getInputText() {
         const start = this.input.selectionStart;
         const end = this.input.selectionEnd;
         const begin = this.input.value.substring(0, start);
         const finish = this.input.value.substring(end);
-        console.log(start, end, begin, finish)
         return { start, end, begin, finish }
     }
 
@@ -149,12 +148,74 @@ class Keyboadrd {
         this.input.setSelectionRange(start, start);
     }
 
-    inputChar(key) {
+    inputChar(key, char) {
+        let resChar = key ? key.name[this.lang][this.state] : char;
         const result = this.getInputText();
-        this.input.value = result.begin + key.name[this.lang][this.state] + result.finish;
+        this.input.value = result.begin + resChar + result.finish;
         this.setFocus(result.start + 1)
     }
 
+    clearPressed(prev) {
+        const pressedKeys = prev ? this.prevPressedKeys : this.pressedKeys;
+        if (pressedKeys) {
+            pressedKeys.forEach(e => {
+                e.ref.classList.remove('active');
+            });
+            if (pressedKeys[0].id === '16_l') {
+                this.setState();
+            }
+            this.prevPressedKeys = null;
+            this.pressedKeys = null;
+            this.shift = false;
+            this.alt = false;
+            this.ctrl = false;
+        }
+    }
+
+    bindFunc() {
+        this.keys.forEach(e => {
+            switch (e.id) {
+                case 'lang':
+                    e.func = keyFunc.changeLanguage.bind(this);
+                    break;
+                case '16_l':
+                    e.func = keyFunc.shiftPressed.bind(this);
+                    break;
+                case '16_r':
+                    e.func = keyFunc.shiftPressed.bind(this);
+                    break;
+                case '17_l':
+                    e.func = keyFunc.ctrlPressed.bind(this);
+                    break;
+                case '17_r':
+                    e.func = keyFunc.ctrlPressed.bind(this);
+                    break;
+                case '18_l':
+                    e.func = keyFunc.altPressed.bind(this);
+                    break;
+                case '18_r':
+                    e.func = keyFunc.altPressed.bind(this);
+                    break;
+                case 20:
+                    e.func = keyFunc.capsPressed.bind(this, e);
+                    break;
+                case 8:
+                    e.func = keyFunc.backspacePressed.bind(this);
+                    break;
+                case 46:
+                    e.func = keyFunc.delPressed.bind(this);
+                    break;
+                case 13:
+                    e.func = keyFunc.enterPressed.bind(this);
+                    break;
+                case 9:
+                    e.func = keyFunc.tabPressed.bind(this);
+                    break;
+                default:
+                    break;
+            }
+        })
+    }
 }
 
 export default Keyboadrd;

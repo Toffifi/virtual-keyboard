@@ -867,8 +867,19 @@ const keys = [
     {
         id: 32,
         size: 6.5,
-        func: true,
-        name: ''
+        func: false,
+        name: {
+            en: {
+                normal: ' ',
+                shifted: ' ',
+                double: false
+            },
+            ru: {
+                normal: ' ',
+                shifted: ' ',
+                double: false
+            }
+        }
     },
     {
         id: '18_r',
