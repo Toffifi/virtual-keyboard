@@ -143,40 +143,82 @@ export function rightPressed(pressed) {
 
 export function upPressed(pressed) {
     if(pressed){
-        const charLine = Math.ceil((this.input.offsetWidth - 20) / this.charWidth);
-        let start = this.input.selectionStart;
-        const rows = this.input.value.split('\n').join('\n\t').split('\n');
-        const arr = [];
-        rows.forEach((e) => {
-            if(e.length > charLine) {
-                let row = e;
-                while (row.length > 0) {
-                    arr.push(row.substring(0, charLine));
-                    row = row.substring(charLine);
-                }
-            } else {
-                arr.push(e);
-            }
-        })     
-        let acc = 0;
-        let newPos = start;
-        for (let i in arr) {
-            if(acc + arr[i].length >= start) {
-                const begin = start - acc;
-                if(i > 0) {
-                    acc -= arr[i - 1].length;
-                    newPos = acc + (begin >= arr[i - 1].length ? arr[i - 1].length : begin);
-                    if (i == 1 && arr[i][0] === '\t' && newPos < arr[0].length - 1) {
-                        newPos = newPos > 0 ? newPos - 1 : 0;
-                    }
-                } else if (i == 0 && arr[i].length === charLine && charLine === start) {
-                    newPos = 0;
-                }
-                break;
-            } else {                
-                acc += arr[i].length;
+        this.setFocus(GetCursorPos(true, this.input, this.charWidth));
+    }
+}
+
+export function downPressed(pressed) {
+    if(pressed){
+        this.setFocus(GetCursorPos(false, this.input, this.charWidth));
+    }
+}
+
+function GetCursorPos(up, input, charWidth) {
+    if (input.value.length === 0) {
+        return 0;
+    }
+    const charLine = Math.floor((input.offsetWidth - 20) / charWidth);
+    let start = input.selectionStart;
+    let newPos = start;
+    const arr = [];
+    let cursor = 0;
+    let startRow = null;
+    let beginChar = 0;
+    for (let i = 0; i < input.value.length; i++) {
+        cursor++;
+        if (i === start) {
+            startRow = arr.length;
+            beginChar = cursor;
+        }
+        if (input.value[i] === '\n') {
+            arr.push({ len: cursor, enter: true });
+            cursor = 0;
+        } else if (i === input.value.length - 1) {
+            arr.push({ len: cursor, enter: false });
+        } else if (cursor >= charLine) {
+            if (input.value[i + 1] !== " ") {
+                arr.push({ len: cursor, enter: false });
+                cursor = 0;
             }
         }
-        this.setFocus(newPos);
     }
+    if (startRow === null) {
+        startRow = arr.length;
+    }
+    if (arr[arr.length - 1].enter) {
+        arr.push({ len: 0, enter: false })
+    }
+  
+    if (up) {
+        if (startRow > 0) {
+            if (input.value.length === newPos && !arr[arr.length - 1].enter && arr[arr.length - 1].len > 0) {
+                newPos--;
+            }
+            if (arr[startRow - 1].len >= beginChar) {
+                newPos -= arr[startRow - 1].len;
+            } else {
+                newPos -= beginChar;
+            }
+        }
+    } else {
+        if (startRow < arr.length - 1) {
+            if ((startRow + 1) === (arr.length - 1) && arr[startRow + 1].len === 0) {
+                newPos = input.value.length;
+            } else if (arr[startRow + 1].len >= beginChar) {
+                newPos += arr[startRow].len;
+            } else {
+                newPos += (arr[startRow].len - beginChar) + arr[startRow + 1].len;
+            }
+        }
+    }
+    
+    const rowCount = Math.floor((input.offsetHeight - 20) / 22);
+    const rowsUp = input.scrollTop / 22;
+    
+    if (startRow - 2 < rowsUp) {
+        input.scrollTop = input.scrollTop - (44);
+    } else if (startRow + 2 > (rowsUp + rowCount)) {
+        input.scrollTop = input.scrollTop + (44);
+    }
+    return newPos;
 }

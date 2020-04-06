@@ -222,6 +222,9 @@ class Keyboadrd {
                 case 39:
                     e.func = keyFunc.rightPressed.bind(this);
                     break;
+                case 40:
+                    e.func = keyFunc.downPressed.bind(this);
+                    break;
                 default:
                     break;
             }
