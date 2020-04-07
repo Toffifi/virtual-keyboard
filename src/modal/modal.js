@@ -9,7 +9,7 @@ export default function modal() {
     overlay.className = 'overlay';
     info.className = 'info';
     
-    modal.innerHTML = '<div class="close-button">Close</div><p>Hi! This is a virtual keyboard for Windows. <br> Use "Shift + Ctrl" to change language.</p>';
+    modal.innerHTML = '<div class="close-button">Close</div><p>Hi! This is a virtual keyboard for Windows. <br> Use "Shift + Alt" to change language.</p>';
     info.innerHTML = '<div class="open-button"><i class="fas fa-info-circle"></i></div>';
     
     document.querySelector('body').appendChild(modal);
