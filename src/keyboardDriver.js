@@ -26,7 +26,7 @@ class keyboardDriver {
                     event.preventDefault();
                 }
             }
-            clearPressed(false);
+            clearPressed(false, key);
         })
     }
 

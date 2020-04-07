@@ -182,18 +182,16 @@ function GetCursorPos(up, input, charWidth) {
             }
         }
     }
-    if (startRow === null) {
-        startRow = arr.length;
-    }
     if (arr[arr.length - 1].enter) {
-        arr.push({ len: 0, enter: false })
+        arr.push({ len: 1, enter: false });
     }
+    if (startRow === null) {
+        startRow = arr.length - 1;
+    }
+
   
     if (up) {
         if (startRow > 0) {
-            if (input.value.length === newPos && !arr[arr.length - 1].enter && arr[arr.length - 1].len > 0) {
-                newPos--;
-            }
             if (arr[startRow - 1].len >= beginChar) {
                 newPos -= arr[startRow - 1].len;
             } else {
@@ -202,16 +200,17 @@ function GetCursorPos(up, input, charWidth) {
         }
     } else {
         if (startRow < arr.length - 1) {
-            if ((startRow + 1) === (arr.length - 1) && arr[startRow + 1].len === 0) {
-                newPos = input.value.length;
-            } else if (arr[startRow + 1].len >= beginChar) {
+            if (arr[startRow + 1].len >= beginChar) {
                 newPos += arr[startRow].len;
             } else {
                 newPos += (arr[startRow].len - beginChar) + arr[startRow + 1].len;
+                if ((startRow + 1 === arr.length - 1) && !arr[startRow + 1].enter) {
+                    newPos++;
+                }
             }
         }
     }
-    
+
     const rowCount = Math.floor((input.offsetHeight - 20) / 22);
     const rowsUp = input.scrollTop / 22;
     

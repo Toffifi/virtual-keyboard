@@ -50,13 +50,13 @@ class Keyboadrd {
                 div.addEventListener('mouseup', (event) => {
                     event.preventDefault();
                     key.func(false, this.prevPressedKeys ? false : true);
-                    this.clearPressed(true);
+                    this.clearPressed(true, key);
                 })
             } else {
                 div.addEventListener('mousedown', (event) => {
                     event.preventDefault();
                     this.inputChar(key);
-                    this.clearPressed(false);
+                    this.clearPressed(false, key);
                 })
                 if(key.name[this.lang].double){
                     div.className = 'keyboard-button_double';
@@ -157,13 +157,13 @@ class Keyboadrd {
         this.setFocus(result.start + 1)
     }
 
-    clearPressed(prev) {
+    clearPressed(prev, curKey) {
         const pressedKeys = prev ? this.prevPressedKeys : this.pressedKeys;
         if (pressedKeys) {
             pressedKeys.forEach(e => {
                 e.ref.classList.remove('active');
             });
-            if (pressedKeys[0].id === '16_l') {
+            if (pressedKeys[0].id === '16_l' && (curKey.id !== '16_l' && curKey.id !== '16_r')) {
                 this.setState();
             }
             this.prevPressedKeys = null;
